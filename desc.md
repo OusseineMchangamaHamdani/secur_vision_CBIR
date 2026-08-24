@@ -14,11 +14,11 @@ Le système repose sur un pipeline CBIR en 4 étapes majeures :
 
 ```mermaid
 flowchart LR
-    A[📷 Acquisition Image / Flux Vidéo] --> B[🔍 Détection & Rognage Facia (MTCNN)]
-    B --> C[🧠 Extraction de Descripteurs (FaceNet 512D)]
-    C --> D[📐 Normalisation L2 du Vecteur]
-    D --> E[⚡ Recherche Vectorielle pgvector (HNSW / Cosine)]
-    E --> F[🎯 Identification & Calcul du Score de Similarité]
+    A["📷 Acquisition Image / Flux Vidéo"] --> B["🔍 Détection & Rognage Facial (MTCNN)"]
+    B --> C["🧠 Extraction de Descripteurs (FaceNet 512D)"]
+    C --> D["📐 Normalisation L2 du Vecteur"]
+    D --> E["⚡ Recherche Vectorielle pgvector (HNSW / Cosine)"]
+    E --> F["🎯 Identification & Score de Similarité"]
 ```
 
 ### 1. Acquisition et Prétraitement Visuel
