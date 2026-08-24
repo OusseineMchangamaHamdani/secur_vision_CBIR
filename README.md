@@ -1,3 +1,14 @@
+## 🛠️ Technologies
+
+- **Langage :** Python
+- **Framework Web :** Flask
+- **Interface Desktop :** PySide6
+- **Deep Learning :** FaceNet / MTCNN
+- **Base de données :** PostgreSQL
+- **Recherche vectorielle :** pgvector
+- **Indexation :** HNSW
+- **Conteneurisation :** Docker
+
 # BioVector - Système de Pointage Facial par Recherche d'Images par le Contenu (CBIR)
 
 ## 📌 Présentation Générale
