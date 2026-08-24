@@ -1,0 +1,30 @@
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# External / Submodule cloned repos
+pgvector/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific sensitive / temporary data
+captures/
+pgdata/
+*.log
+*.sqlite3
+
+# OS files
+Thumbs.db
+.DS_Store

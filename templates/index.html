@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioVector SaaS - Pointage Facial & Recherche Vectorielle pgvector</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #080c14;
+            --panel-bg: rgba(15, 23, 42, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.35);
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Header Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 28px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .brand-title h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .system-badges {
+            display: flex;
+            gap: 12px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--panel-border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        /* Bento Grid Layout */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            flex-grow: 1;
+        }
+
+        .bento-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-title i {
+            color: var(--accent-cyan);
+        }
+
+        /* Camera Feed Box */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-overlay-tag {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Side Comparison Column: Captured Photo vs Database Matched Photo */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .photo-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .photo-box label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 140px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Profile Details */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+        }
+
+        .user-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .details-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-item label {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .detail-item span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .similarity-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            color: var(--accent-green);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Controls Panel */
+        .controls-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        /* Attendance Table */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--panel-border);
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-fingerprint"></i>
+            </div>
+            <div class="brand-title">
+                <h1>BioVector SaaS</h1>
+                <p>Recherche Vectorielle pgvector & Détection Caméra 5s</p>
+            </div>
+        </div>
+        <div class="system-badges">
+            <div class="badge">
+                <div class="badge-dot"></div>
+                PostgreSQL pgvector (512D)
+            </div>
+            <div class="badge">
+                <i class="fa-solid fa-bolt" style="color: var(--accent-cyan)"></i>
+                FaceNet Cosine Matcher
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bento Grid Container -->
+    <div class="bento-grid">
+        
+        <!-- Bento Card 1 : Direct Camera Feed & 5s Countdown -->
+        <div class="bento-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa-solid fa-video"></i>
+                    Flux Vidéo Caméra (HUD & Compte à Rebours 5s)
+                </div>
+                <div class="badge">
+                    <i class="fa-solid fa-clock"></i>
+                    Détection & Timer 5s
+                </div>
+            </div>
+            <div class="camera-container">
+                <div class="camera-overlay-tag">
+                    <div class="badge-dot"></div>
+                    CAMÉRA EN DIRECT
+                </div>
+                <img src="/video_feed" class="camera-feed" alt="Flux Vidéo Caméra en Direct">
+            </div>
+            <div class="controls-row">
+                <button class="btn btn-primary" onclick="triggerManualSearch()">
+                    <i class="fa-solid fa-camera"></i>
+                    Déclencher Recherche Immédiate sur Frame
+                </button>
+            </div>
+        </div>
+
+        <!-- Bento Card 2 : Capture vs DB Match Comparison & Profile Details -->
+        <div class="bento-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa-solid fa-user-check"></i>
+                    Résultat de la Recherche Vectorielle
+                </div>
+            </div>
+
+            <!-- Comparison Photos: Left = Captured Snapshot (5s), Right = Database Matched Photo -->
+            <div class="comparison-grid">
+                <div class="photo-box">
+                    <label><i class="fa-solid fa-camera"></i> Capture Effectuée (5s)</label>
+                    <img id="capturedImg" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="photo-preview" alt="Capture Récente">
+                </div>
+                <div class="photo-box">
+                    <label><i class="fa-solid fa-database"></i> Image Correspondante DB</label>
+                    <img id="matchedDbImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="photo-preview" alt="Image DB">
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <div>
+                    <div class="user-name" id="userName">En attente de détection...</div>
+                    <div class="user-role" id="userRole">Positionnez-vous face à la caméra pendant 5s</div>
+                </div>
+
+                <div class="similarity-badge" id="similarityBadge">
+                    <span>Similarité Cosinus pgvector</span>
+                    <span id="similarityScore">0.0%</span>
+                </div>
+
+                <div class="details-list">
+                    <div class="detail-item">
+                        <label>Matricule</label>
+                        <span id="empNumber">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Département</label>
+                        <span id="empDept">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <span id="empEmail">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Statut</label>
+                        <span id="empStatus">EN ATTENTE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Card 3 : Live Attendance Logs Table -->
+        <div class="bento-card" style="grid-column: span 2;">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa-solid fa-list-check"></i>
+                    Historique des Pointages Récent (PostgreSQL Log)
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Heure</th>
+                            <th>Employé Identifié</th>
+                            <th>Département</th>
+                            <th>Poste</th>
+                            <th>Similarité Cosinus</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable">
+                        <tr>
+                            <td colspan="6" style="text-align:center; color: var(--text-muted);">Aucun pointage enregistré pour le moment.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Poll status from API every 1 second
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                // Update Last Captured Image if available
+                if (data.last_captured_image) {
+                    document.getElementById('capturedImg').src = '/get_image?path=' + encodeURIComponent(data.last_captured_image) + '&t=' + new Date().getTime();
+                }
+
+                // Update Vector Search Result & DB Matched Image
+                if (data.last_result && data.last_result.status === 'found') {
+                    const bm = data.last_result.best_match;
+                    document.getElementById('userName').innerText = bm.first_name + ' ' + bm.last_name;
+                    document.getElementById('userRole').innerText = bm.position || 'Employé';
+                    document.getElementById('similarityScore').innerText = bm.similarity_percent + '% Match';
+                    document.getElementById('empNumber').innerText = bm.employee_number || 'EMP001';
+                    document.getElementById('empDept').innerText = bm.department || 'Informatique';
+                    document.getElementById('empEmail').innerText = bm.email || '---';
+                    document.getElementById('empStatus').innerText = 'VALIDÉ (POINTAGE HORS SÉCURITÉ)';
+
+                    if (bm.image_path) {
+                        document.getElementById('matchedDbImg').src = '/get_image?path=' + encodeURIComponent(bm.image_path) + '&t=' + new Date().getTime();
+                    }
+                } else if (data.last_result && data.last_result.status === 'unknown_person') {
+                    document.getElementById('userName').innerText = 'Personne Inconnue';
+                    document.getElementById('userRole').innerText = 'Accès Refusé';
+                    document.getElementById('similarityScore').innerText = '0.0%';
+                    document.getElementById('empStatus').innerText = 'REFUSÉ';
+                }
+
+                // Update Attendance History Table
+                if (data.attendance_history && data.attendance_history.length > 0) {
+                    const tbody = document.getElementById('attendanceTable');
+                    tbody.innerHTML = data.attendance_history.map(item => `
+                        <tr>
+                            <td><i class="fa-regular fa-clock" style="margin-right: 6px;"></i>${item.timestamp}</td>
+                            <td style="font-weight: 600; color: #fff;">${item.first_name} ${item.last_name}</td>
+                            <td>${item.department}</td>
+                            <td>${item.position}</td>
+                            <td><span style="color: var(--accent-green); font-weight:700;">${item.similarity}%</span></td>
+                            <td><span class="status-pill">APPROVED</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Erreur mise à jour statut :", err);
+            }
+        }
+
+        async function triggerManualSearch() {
+            const res = await fetch('/api/trigger_search', { method: 'POST' });
+            fetchStatus();
+        }
+
+        setInterval(fetchStatus, 800);
+    </script>
+</body>
+</html>

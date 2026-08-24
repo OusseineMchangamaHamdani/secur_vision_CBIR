@@ -1,0 +1,6 @@
+.venv
+volumeDB
+pgvector
+.git
+__pycache__
+*.pyc
